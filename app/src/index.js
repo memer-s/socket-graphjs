@@ -3,43 +3,52 @@ import {io} from 'socket.io-client';
 
 const socket = io('ws://localhost:8080')
 
-let labels = [];
+function createGraph(id, unit) {
 
-let data = {
-   labels: labels,
-   datasets: [{
-      label: 'My First dataset',
-      backgroundColor: 'rgb(255, 99, 132)',
-      borderColor: 'rgb(255, 99, 132)',
-      data: [],
-   }]
-};
+   const data = {
+      labels: [],
+      datasets: [{
+         label: unit,
+         backgroundColor: 'rgb(255, 99, 132)',
+         borderColor: 'rgb(255, 99, 132)',
+         data: [],
+      }]
+   };
 
-const config = {
-   type: 'line',
-   data: data,
-   options: {
-      responsive: true
+   const config = {
+      type: 'line',
+      data: data,
+      options: {
+         responsive: true
+      }
    }
-}
 
+   const myChart = new Chart(
+      document.getElementById(id),
+      config
+   );
+
+   return myChart;
+}
 //let index = 0
 
-function bruh(data) {
+function addData(chart, data) {
    //let date = new Date()
-   myChart.data.labels.push(data)
-   myChart.data.datasets[0].data.push(Math.sin(data))
+   chart.data.labels.push('')
+   chart.data.datasets[0].data.push(data)
 
-   myChart.update()
+   chart.update()
 
    //index += 0.1
    //setTimeout(function () {bruh()}, 100)
 }
 
-const myChart = new Chart(
-   document.getElementById('myChart'),
-   config
-);
+let charts = [];
+
+for (let i = 0; i < 4; i += 1) {
+   charts.push(createGraph('myChart' + i, 'bruh'));
+}
+
 
 socket.on("connect", () => {
    console.log('connected')
@@ -47,5 +56,8 @@ socket.on("connect", () => {
 
 socket.on("newdata", (data) => {
    console.log(data)
-   bruh(data)
+   addData(charts[0], data)
+   addData(charts[1], Math.sin(data))
+   addData(charts[2], Math.cos(data))
+   addData(charts[3], Math.sqrt(data))
 })
